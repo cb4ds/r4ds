@@ -59,7 +59,7 @@ x <- df$a
 (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
 ```
 
-There is some duplication in this code. We're computing the range of the data three times, but it makes sense to do it in one step:
+There is some duplication in this code. We're computing the range of the data three times, so it makes sense to do it in one step:
 
 ```{r}
 rng <- range(x, na.rm = TRUE)
@@ -129,7 +129,7 @@ rescale01(x)
 
 This is an important part of the "do not repeat yourself" (or DRY) principle. The more repetition you have in your code, the more places you need to remember to update when things change (and they always do!), and the more likely you are to create bugs over time.
 
-### Practice
+### Exercises
 
 1.  Why is `TRUE` not a parameter to `rescale01()`? What would happen if
     `x` contained a single missing value, and `na.rm` was `FALSE`?
@@ -150,16 +150,17 @@ This is an important part of the "do not repeat yourself" (or DRY) principle. Th
     sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE)
     ```
 
-1.  Follow <http://nicercode.github.io/intro/writing-functions.html> to 
-    write your own functions to compute the variance and skew of a numeric 
-    vector.
+1.  write your own functions to compute the variance and skewness of a numeric vector.
+    Variance is defined as
+    $$
+    \mathrm{Var}(x) = \frac{1}{n - 1} \sum_{i=1}^n (x_i - \bar{x}) ^2 \text{,}
+    $$
+    where $\bar{x} = (\sum_i^n x_i) / n$ is the sample mean.
+    Skewness is defined as
+    $$
+    \mathrm{Skew}(x) = \frac{\frac{1}{n-2}\left(\sum_{i=1}^n(x_i - \bar x)^3\right)}{\mathrm{Var}(x)^{3/2}} \text{.}
+    $$
 
-1.  Implement a `fizzbuzz` function. It takes a single number as input. If
-    the number is divisible by three, it returns "fizz". If it's divisible by
-    five it returns "buzz". If it's divisible by three and five, it returns
-    "fizzbuzz". Otherwise, it returns the number. Make sure you first write 
-    working code before you create the function.
-    
 1.  Write `both_na()`, a function that takes two vectors of the same length 
     and returns the number of positions that have an `NA` in both vectors.
 
@@ -284,9 +285,9 @@ if (condition) {
 }
 ```
 
-To get help on `if` you need to surround it in backticks: `` ?`if` ``.
+To get help on `if` you need to surround it in backticks: `` ?`if` ``. The help isn't particularly helpful if you're not already an experienced programmer, but at least you know how to get to it!
 
-Here's a simple function that uses an if statement. The goal of this function is to return a logical vector describing whether or not each element of a vector is named.
+Here's a simple function that uses an `if` statement. The goal of this function is to return a logical vector describing whether or not each element of a vector is named.
 
 ```{r}
 has_name <- function(x) {
@@ -419,6 +420,12 @@ if (y < 20) {
     argument that defaults to `lubridate::now()`. That will make it 
     easier to test your function.)
 
+1.  Implement a `fizzbuzz` function. It takes a single number as input. If
+    the number is divisible by three, it returns "fizz". If it's divisible by
+    five it returns "buzz". If it's divisible by three and five, it returns
+    "fizzbuzz". Otherwise, it returns the number. Make sure you first write 
+    working code before you create the function.
+    
 1.  How could you use `cut()` to simplify this set of nested if-else statements?
 
     ```{r, eval = FALSE}
@@ -528,7 +535,7 @@ As you start to write more functions, you'll eventually get to the point where y
 
 ```{r}
 wt_mean <- function(x, w) {
-  sum(x * w) / sum(x)
+  sum(x * w) / sum(w)
 }
 wt_var <- function(x, w) {
   mu <- wt_mean(x, w)
@@ -554,7 +561,7 @@ wt_mean <- function(x, w) {
   if (length(x) != length(w)) {
     stop("`x` and `w` must be the same length", call. = FALSE)
   }
-  sum(w * x) / sum(x)
+  sum(w * x) / sum(w)
 }
 ```
 
@@ -577,7 +584,7 @@ wt_mean <- function(x, w, na.rm = FALSE) {
     x <- x[!miss]
     w <- w[!miss]
   }
-  sum(w * x) / sum(x)
+  sum(w * x) / sum(w)
 }
 ```
 
@@ -593,7 +600,7 @@ wt_mean <- function(x, w, na.rm = FALSE) {
     x <- x[!miss]
     w <- w[!miss]
   }
-  sum(w * x) / sum(x)
+  sum(w * x) / sum(w)
 }
 wt_mean(1:6, 6:1, na.rm = "foo")
 ```
@@ -718,11 +725,9 @@ This tends to make the code easier to understand, because you don't need quite s
 
 ### Writing pipeable functions
 
-If you want to write your own pipeable functions, thinking about the return value is important. There are two main types of pipeable functions: transformation and side-effect.
+If you want to write your own pipeable functions, it's important to think about the return value. Knowing the return value's object type will mean that your pipeline will "just work". For example, with dplyr and tidyr the object type is the data frame. 
 
-In __transformation__ functions, there's a clear "primary" object that is passed in as the first argument, and a modified version is returned by the function. For example, the key objects for dplyr and tidyr are data frames. If you can identify what the object type is for your domain, you'll find that your functions just work with the pipe.
-
-__Side-effect__ functions are primarily called to perform an action, like drawing a plot or saving a file, not transforming an object. These functions should "invisibly" return the first argument, so they're not printed by default, but can still be used in a pipeline. For example, this simple function that prints out the number of missing values in a data frame:
+There are two basic types of pipeable functions: transformations and side-effects. With __transformations__, an object is passed to the function's first argument and a modified object is returned. With __side-effects__, the passed object is not transformed. Instead, the function performs an action on the object, like drawing a plot or saving a file. Side-effects functions should "invisibly" return the first argument, so that while they're not printed they can still be used in a pipeline. For example, this simple function prints the number of missing values in a data frame:
 
 ```{r}
 show_missings <- function(df) {

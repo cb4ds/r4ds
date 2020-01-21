@@ -1,6 +1,8 @@
 # Workflow: basics
 
-You now have some experience running R code. I didn't give you many details, but you've obviously figured out the basics, or you would've thrown this book away in frustration! Before we go any further, let's make sure you've got a solid foundation in running R code and, and that you know about some of the most helpful RStudio features.
+You now have some experience running R code. I didn't give you many details, but you've obviously figured out the basics, or you would've thrown this book away in frustration! Frustration is natural when you start programming in R, because it is such a stickler for punctuation, and even one character out of place will cause it to complain. But while you should expect to be a little frustrated, take comfort in that it's both typical and temporary: it happens to everyone, and the only way to get over it is to keep trying.
+
+Before we go any further, let's make sure you've got a solid foundation in running R code, and that you know about some of the most helpful RStudio features.
 
 ## Coding basics
 
@@ -82,7 +84,7 @@ R has a large collection of built-in functions that are called like this:
 function_name(arg1 = val1, arg2 = val2, ...)
 ```
 
-Let's try using `seq()` which makes regular **seq**uences of numbers and, while we're at it, learn more helpful features of RStudio. Type `se` and hit TAB. A popup shows you possible completions. Specify `seq()` by typing more (a "q") to disambiguate, or by using ↑/↓ arrows to select. Notice the floating tooltip that pops up, reminding you of the function's arguments and purpose. If you want more help, press F1 to get all the details in help tab in the lower right pane. 
+Let's try using `seq()` which makes regular **seq**uences of numbers and, while we're at it, learn more helpful features of RStudio. Type `se` and hit TAB. A popup shows you possible completions. Specify `seq()` by typing more (a "q") to disambiguate, or by using ↑/↓ arrows to select. Notice the floating tooltip that pops up, reminding you of the function's arguments and purpose. If you want more help, press F1 to get all the details in the help tab in the lower right pane. 
 
 Press TAB once more when you've selected the function you want. RStudio will add matching opening (`(`) and closing (`)`) parentheses for you. Type the arguments `1, 10` and hit return.
 
@@ -90,7 +92,7 @@ Press TAB once more when you've selected the function you want. RStudio will add
 seq(1, 10)
 ```
 
-Type this code and notice similar assistance help with the paired quotation marks:
+Type this code and notice you get similar assistance with the paired quotation marks:
 
 ```{r}
 x <- "hello world"
@@ -126,7 +128,7 @@ knitr::include_graphics("screenshots/rstudio-env.png")
 
 Here you can see all of the objects that you've created.
 
-## Practice
+## Exercises
 
 1.  Why does this code not work?
 

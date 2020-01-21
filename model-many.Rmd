@@ -13,9 +13,9 @@ In this chapter you're going to learn three powerful ideas that help you to work
 1.  Using the __broom__ package, by David Robinson, to turn models into tidy 
     data. This is a powerful technique for working with large numbers of models
     because once you have tidy data, you can apply all of the techniques that 
-    you've learned about in earlier in the book.
+    you've learned about earlier in the book.
 
-We'll start by diving into a motivating example using data about life expectancy around the world. It's a small dataset but it illustrates how important modelling can be for improving your visualisations. We'll use a large number of simple models to partition out some of the strongest signal so we can see the subtler signals that remain. We'll also see how model summaries can help us pick out outliers and unusual trends.
+We'll start by diving into a motivating example using data about life expectancy around the world. It's a small dataset but it illustrates how important modelling can be for improving your visualisations. We'll use a large number of simple models to partition out some of the strongest signals so we can see the subtler signals that remain. We'll also see how model summaries can help us pick out outliers and unusual trends.
 
 The following sections will dive into more detail about the individual techniques:
 
@@ -107,7 +107,7 @@ by_country
 
 (I'm cheating a little by grouping on both `continent` and `country`. Given `country`, `continent` is fixed, so this doesn't add any more groups, but it's an easy way to carry an extra variable along for the ride.)
 
-This creates an data frame that has one row per group (per country), and a rather unusual column: `data`. `data` is a list of data frames (or tibbles, to be precise).  This seems like a crazy idea: we have a data frame with a column that is a list of other data frames! I'll explain shortly why I think this is a good idea.
+This creates a data frame that has one row per group (per country), and a rather unusual column: `data`. `data` is a list of data frames (or tibbles, to be precise).  This seems like a crazy idea: we have a data frame with a column that is a list of other data frames! I'll explain shortly why I think this is a good idea.
 
 The `data` column is a little tricky to look at because it's a moderately complicated list, and we're still working on good tools to explore these objects. Unfortunately using `str()` is not recommended as it will often produce very long output. But if you pluck out a single element from the `data` column you'll see that it contains all the data for that country (in this case, Afghanistan).
 
@@ -133,7 +133,7 @@ And we want to apply it to every data frame. The data frames are in a list, so w
 models <- map(by_country$data, country_model)
 ```
 
-However, rather than leaving leaving the list of models as a free-floating object, I think it's better to store it as a column in the `by_country` data frame. Storing related objects in columns is a key part of the value of data frames, and why I think list-columns are such a good idea. In the course of working with these countries, we are going to have lots of lists where we have one element per country. So why not store them all together in one data frame?
+However, rather than leaving the list of models as a free-floating object, I think it's better to store it as a column in the `by_country` data frame. Storing related objects in columns is a key part of the value of data frames, and why I think list-columns are such a good idea. In the course of working with these countries, we are going to have lots of lists where we have one element per country. So why not store them all together in one data frame?
 
 In other words, instead of creating a new object in the global environment, we're going to create a new variable in the `by_country` data frame. That's a job for `dplyr::mutate()`:
 
@@ -194,7 +194,7 @@ resids %>%
     facet_wrap(~continent)
 ```
 
-It looks like we've missed some mild quadratic pattern. There's also something interesting going on in Africa: we see some very large residuals which suggests our model isn't fitting so well there. We'll explore that more in the next section, attacking it from a slightly different angle.
+It looks like we've missed some mild patterns. There's also something interesting going on in Africa: we see some very large residuals which suggests our model isn't fitting so well there. We'll explore that more in the next section, attacking it from a slightly different angle.
 
 ### Model quality
 
@@ -266,12 +266,12 @@ We see two main effects here: the tragedies of the HIV/AIDS epidemic and the Rwa
 1.  To create the last plot (showing the data for the countries with the
     worst model fits), we needed two steps: we created a data frame with
     one row per country and then semi-joined it to the original dataset.
-    It's possible avoid this join if we use `unnest()` instead of 
+    It's possible to avoid this join if we use `unnest()` instead of 
     `unnest(.drop = TRUE)`. How?
 
 ## List-columns
 
-Now that you've seen a basic workflow for managing many models, let's dive back into some of the details. In this section, we'll explore the list-column data structure in a little more detail. It's only recently that I've really appreciated the idea of the list-column. List-columns are implicit in the definition of the data frame: a data frame is a named list of equal length vectors. A list is a vector, so it's always been legitimate to put use a list as a column of a data frame. However, base R doesn't make it easy to create list-columns, and `data.frame()` treats a list as a list of columns:.
+Now that you've seen a basic workflow for managing many models, let's dive back into some of the details. In this section, we'll explore the list-column data structure in a little more detail. It's only recently that I've really appreciated the idea of the list-column. List-columns are implicit in the definition of the data frame: a data frame is a named list of equal length vectors. A list is a vector, so it's always been legitimate to use a list as a column of a data frame. However, base R doesn't make it easy to create list-columns, and `data.frame()` treats a list as a list of columns:.
 
 ```{r}
 data.frame(x = list(1:3, 3:5))
@@ -292,6 +292,16 @@ Tibble alleviates this problem by being lazier (`tibble()` doesn't modify its in
 tibble(
   x = list(1:3, 3:5), 
   y = c("1, 2", "3, 4, 5")
+)
+```
+
+It's even easier with `tribble()` as it can automatically work out that you need a list:
+
+```{r}
+tribble(
+   ~x, ~y,
+  1:3, "1, 2",
+  3:5, "3, 4, 5"
 )
 ```
 
@@ -349,7 +359,11 @@ gapminder %>%
 Some useful functions take an atomic vector and return a list. For example, in [strings] you learned about `stringr::str_split()` which takes a character vector and returns a list of character vectors. If you use that inside mutate, you'll get a list-column:
 
 ```{r}
-df <- tibble(x1 = c("a,b,c", "d,e,f,g")) 
+df <- tribble(
+  ~x1,
+  "a,b,c", 
+  "d,e,f,g"
+) 
 
 df %>% 
   mutate(x2 = stringr::str_split(x1, ","))
@@ -363,14 +377,14 @@ df %>%
   unnest()
 ```
 
-(If you find yourself using this pattern a lot, make sure to check out `tidyr:separate_rows()` which is a wrapper around this common pattern).
+(If you find yourself using this pattern a lot, make sure to check out `tidyr::separate_rows()` which is a wrapper around this common pattern).
 
 Another example of this pattern is using the `map()`, `map2()`, `pmap()` from purrr. For example, we could take the final example from [Invoking different functions] and rewrite it to use `mutate()`:
 
 ```{r}
 sim <- tribble(
   ~f,      ~params,
-  "runif", list(min = -1, max = -1),
+  "runif", list(min = -1, max = 1),
   "rnorm", list(sd = 5),
   "rpois", list(lambda = 10)
 )
@@ -433,7 +447,6 @@ df %>%
   mutate(
     smry = map2_chr(name, value, ~ stringr::str_c(.x, ": ", .y[1]))
   )
-
 ```
 
 ### Exercises
@@ -476,15 +489,14 @@ These are described in more detail below.
 
 ### List to vector
 
-If you can reduce your list column to an atomic vector then it will be a regular column. For example, you can always summarise an object with it's type and length, so this code will work regardless of what sort of list-column you have:
+If you can reduce your list column to an atomic vector then it will be a regular column. For example, you can always summarise an object with its type and length, so this code will work regardless of what sort of list-column you have:
 
 ```{r}
-df <- tibble(
-  x = list(
-    letters[1:5],
-    1:3,
-    runif(5)
-  )
+df <- tribble(
+  ~x,
+  letters[1:5],
+  1:3,
+  runif(5)
 )
   
 df %>% mutate(
@@ -498,11 +510,10 @@ This is the same basic information that you get from the default tbl print metho
 Don't forget about the `map_*()` shortcuts - you can use `map_chr(x, "apple")` to extract the string stored in `apple` for each element of `x`. This is useful for pulling apart nested lists into regular columns. Use the `.null` argument to provide a value to use if the element is missing (instead of returning `NULL`):
 
 ```{r}
-df <- tibble(
-  x = list(
-    list(a = 1, b = 2),
-    list(a = 2, c = 4)
-  )
+df <- tribble(
+  ~x,
+  list(a = 1, b = 2),
+  list(a = 2, c = 4)
 )
 df %>% mutate(
   a = map_dbl(x, "a"),
@@ -523,19 +534,19 @@ This means that you can't simultaneously unnest two columns that contain differe
 ```{r, error = TRUE}
 # Ok, because y and z have the same number of elements in
 # every row
-df1 <- tibble(
-  x = 1:2, 
-  y = list(c("a", "b"), "c"), 
-  z = list(1:2, 3)
+df1 <- tribble(
+  ~x, ~y,           ~z,
+   1, c("a", "b"), 1:2,
+   2, "c",           3
 )
 df1
 df1 %>% unnest(y, z)
 
 # Doesn't work because y and z have different number of elements
-df2 <- tibble(
-  x = 1:2, 
-  y = list("a", c("b", "c")), 
-  z = list(1:2, 3)
+df2 <- tribble(
+  ~x, ~y,           ~z,
+   1, "a",         1:2,  
+   2, c("b", "c"),   3
 )
 df2
 df2 %>% unnest(y, z)
